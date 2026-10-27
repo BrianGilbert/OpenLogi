@@ -357,6 +357,45 @@ its first identifier on this platform. It does not offer an application in
 Recent applications or All applications when that application already runs
 under a profile. The desktop app does not create aliases; write them here.
 
+### Linked Easy-Switch hosts
+
+Easy-Switch follow is **off by default**. Select the keyboard in the app, open
+the **Device** tab, and turn on each mouse under **Easy-Switch**. Turning a
+mouse off removes only that link; with all mice off, no host-switch session is
+armed. Changes are saved and applied by the agent without restarting.
+
+![Optional Easy-Switch mouse-follow control](easy-switch.png)
+
+For manual configuration, put `host_switch_targets` on the keyboard's physical
+device entry, using the mouse's existing config key:
+
+```toml
+[devices."unit:11111111"]
+host_switch_targets = ["unit:22222222"]
+```
+
+Use the actual `unit:` or `serial:` keys from your config, not the example IDs.
+OpenLogi must be running on the host the keyboard is leaving, and the keyboard
+must announce its host change (HID++ `ChangeHost` v2) or expose reportable
+host controls. MX Keys Mini over Bolt announces its host change; its
+Easy-Switch keys remain native. For older keyboards, inspect
+`openlogi diag controls --device "MX Keys"`: controls `0x00d1`–`0x00d3`
+need `divertable` or `analytics-events` support.
+
+A linked mouse moves to its slot for the same computer: the slot whose host
+name matches the keyboard's new slot, or else the slot with the same number
+(see `host_switch_targets` above). Pairing keyboard and mouse slot 1 to the
+same computer, slot 2 to the same second computer, and so on always works.
+Install and configure OpenLogi on each computer for switches initiated there;
+switching back does not run code on the computer that was left behind.
+Offline mice cannot be commanded.
+
+After manual file edits, restart the agent. Its log reports
+`host switch link active` when monitoring is armed. When the keyboard leaves
+by itself, OpenLogi moves only the linked targets and sends nothing more to
+the keyboard. Arming alone does not prove a physical host transition; test an
+Easy-Switch press and verify the mouse on the destination computer.
+
 ## Actions
 
 Action names are the serialized Rust variant names, including `Copy`,
